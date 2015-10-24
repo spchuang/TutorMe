@@ -12,12 +12,13 @@ var {
   StyleSheet,
   Text,
   View,
-  TouchableHighlight,
+  ScrollView,
 } = React;
 
+var Button = require('react-native-button');
+var ImageView = require('../components/ImageView');
 var Swiper = require('react-native-swiper')
 var TimerMixin = require('react-timer-mixin');
-var ImageView = require('../components/ImageView');
 
 var { Icon, } = require('react-native-icons');
 
@@ -53,32 +54,37 @@ var QuestionFeedContainer = React.createClass({
   _renderQuestion(i: num): $jsx {
     return (
       <View style={styles.slide}>
-        <View style={styles.header}>
-          <Text style={styles.text}>{MOCK_DATA[i].user} - {MOCK_DATA[i].subject}</Text>
-        </View>
-        <ImageView source={MOCK_DATA[i].image}/>
+        <ScrollView style={styles.scroll}>
+          <View style={styles.title}>
+            <Text style={styles.text}>{MOCK_DATA[i].user} - {MOCK_DATA[i].subject}</Text>
+          </View>
+          <ImageView source={MOCK_DATA[i].image}/>
 
-        <View style={styles.description}>
-          <Text style={styles.text}> TEST</Text>
-        </View>
+          <View style={styles.description}>
+            <Text style={styles.text}> 
+              Facebook is an open-source framework allowing you
+              to ... The vertical position of each child is determined from a combination 
+              Facebook is an open-source framework allowing you
+              to ... The vertical position of each child is determined from a combination 
+              Facebook is an open-source framework allowing you
+              to ... The vertical position of each child is determined from a combination 
+            </Text>
 
-        <View style={styles.row}>
-          
-          <TouchableHighlight 
-            onPress={() => this.answerQuestion()}
-            underlayColor="#E25C66"
-            style={styles.buttonWrap}
-            >
-            <View style={styles.button}>
+          </View>
+
+        </ScrollView>
+        <View style={styles.footer}>
+          <View style={styles.buttonWrap}>
+            <Button onPress={this.answerQuestion}>
               <Icon
                 name='ion|android-send'
                 size={30}
                 color='white'
                 style={styles.buttonIcon}
-                />
+              />
               <Text style={styles.buttonText}>Answer</Text>
-            </View>
-          </TouchableHighlight>
+            </Button>
+          </View>
         </View>
       </View>
     );
@@ -87,7 +93,7 @@ var QuestionFeedContainer = React.createClass({
   answerQuestion(): void {
     this.props.navigator.push({
       title: 'New',
-      component: QuestionFeed,
+      component: QuestionFeedContainer,
     });
   },
 });
@@ -96,17 +102,26 @@ var styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 64,
+    
   },
-
+  scroll: {
+    height: 450,
+  },
   description: {
-
+    alignItems: 'center',
+    padding: 10,
+    backgroundColor: '#28ABE3',
   },
-
+  footer: {
+    backgroundColor: 'transparent',
+    marginBottom: 120,
+    alignItems: 'center',
+  },
   slide: {
     flex: 1,
     backgroundColor: 'transparent',
   },
-  header: {
+  title: {
     backgroundColor: '#28ABE3',
     padding: 10,
   },
@@ -115,26 +130,19 @@ var styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '500',
   },
-  row: {
-    alignItems: 'center',
-  },
 
   buttonWrap: {
-    marginTop: 15,
+    marginTop: 5,
     borderRadius: 8,
     padding: 10,
     width: 200,
     backgroundColor: 'DB3340',
   },
-  button: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-  },
   buttonText: {
     fontSize: 20,
     color: 'white',
     fontFamily: 'HelveticaNeue-Medium',
+    marginRight: 50,
   },
   buttonIcon: {
     width: 40,

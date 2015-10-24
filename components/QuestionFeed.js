@@ -51,6 +51,7 @@ var styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
+    paddingTop: 64,
   },
   thumbnail: {
     width: 53,

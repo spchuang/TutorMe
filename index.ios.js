@@ -16,12 +16,19 @@ var {
 } = React;
 
 var QuestionFeed = require('./components/QuestionFeed');
-var Footer = require('./components/Footer');
+var TabContainer = require('./components/TabContainer');
 
 var TutorMe = React.createClass({
   render(): $jsx {
     return (
       <View style={{flex: 1}}>
+        <TabContainer/>
+      </View>
+    );
+  },
+  _renderMainView(selectedState: string): $jsx {
+    if (selectedState === 'home') {
+      return (
         <NavigatorIOS
           style={styles.container}
           initialRoute={{
@@ -29,9 +36,14 @@ var TutorMe = React.createClass({
             component: QuestionFeed,
           }}
         />
-        <Footer/>
-      </View>
-    );
+      );
+    } else {
+      return (
+        <View style={{flex: 1}}>
+          <Text> TEST</Text>
+        </View>
+      );
+    }
   }
 });
 

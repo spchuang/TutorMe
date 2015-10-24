@@ -15,7 +15,6 @@ var {
   StyleSheet,
 } = React;
 
-var QuestionFeed = require('./components/QuestionFeed');
 var TabContainer = require('./components/TabContainer');
 
 var TutorMe = React.createClass({
@@ -31,10 +30,7 @@ var TutorMe = React.createClass({
       return (
         <NavigatorIOS
           style={styles.container}
-          initialRoute={{
-            title: 'Questions',
-            component: QuestionFeed,
-          }}
+
         />
       );
     } else {

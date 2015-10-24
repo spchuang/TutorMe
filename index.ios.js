@@ -15,36 +15,16 @@ var {
   StyleSheet,
 } = React;
 
-var QuestionFeed = require('./components/QuestionFeed');
-var TabContainer = require('./components/TabContainer');
+var TabContainer = require('./containers/TabContainer');
 
 var TutorMe = React.createClass({
   render(): $jsx {
     return (
       <View style={{flex: 1}}>
-        <TabContainer/>
+        <TabContainer />
       </View>
     );
   },
-  _renderMainView(selectedState: string): $jsx {
-    if (selectedState === 'home') {
-      return (
-        <NavigatorIOS
-          style={styles.container}
-          initialRoute={{
-            title: 'Questions',
-            component: QuestionFeed,
-          }}
-        />
-      );
-    } else {
-      return (
-        <View style={{flex: 1}}>
-          <Text> TEST</Text>
-        </View>
-      );
-    }
-  }
 });
 
 var styles = StyleSheet.create({

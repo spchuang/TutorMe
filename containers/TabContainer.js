@@ -8,15 +8,13 @@
 var React = require('react-native');
 
 var {
-  ActivityIndicatorIOS,
   StyleSheet,
   View,
   NavigatorIOS,
   Text,
-  TouchableHighlight,
 } = React;
 
-var QuestionFeed = require('./QuestionFeed');
+var QuestionFeedContainer = require('./QuestionFeedContainer');
 
 var { Icon, TabBarIOS, Spinner} = require('react-native-icons');
 var TabBarItemIOS = TabBarIOS.Item;
@@ -40,7 +38,7 @@ var TabContainer = React.createClass({
     return (
       <TabBarIOS
         selectedTab={this.state.selectedTab}
-        tintColor={'#c1d82f'}
+        tintColor={'#1FDA9A'}
         barTintColor={'#000000'}
         styles={styles.tabBar}>
         {this._renderQuestionFeedTab()}
@@ -66,7 +64,7 @@ var TabContainer = React.createClass({
           style={styles.nav}
           initialRoute={{
             title: 'Questions',
-            component: QuestionFeed,
+            component: QuestionFeedContainer,
           }}
         />
       </TabBarItemIOS>

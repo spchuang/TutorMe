@@ -13,9 +13,11 @@ var {
   StyleSheet,
   Text,
   View,
-  TabBarIOS,
   TouchableHighlight,
 } = React;
+
+var { Icon, TabBarIOS, Spinner} = require('react-native-icons');
+var TabBarItemIOS = TabBarIOS.Item;
 
 var Footer = React.createClass({
 
@@ -23,35 +25,75 @@ var Footer = React.createClass({
   getInitialState(): Object {
     return {
       selectedTab: 'home',
-      notifCount: 0,
-      presses: 0,
-      //rotation: Animated.Value(0)
     };
   },
 
   render(): $jsx {
     return (
-      <TabBarIOS selectedTab={this.state.selectedTab}>
-        <TabBarIOS.Item
-          selected={this.state.selectedTab === 'welcome'}
-          icon={{uri:'featured'}}
+      <TabBarIOS
+        selectedTab={this.state.selectedTab}
+        tintColor={'#c1d82f'}
+        barTintColor={'#000000'}
+        styles={styles.tabBar}>
+        <TabBarItemIOS
+          name="home"
+          iconName={'ion|ios-home-outline'}
+          title={''}
+          badgeValue={'3'}
+          iconSize={32}
+          accessibilityLabel="Home Tab"
+          selected={this.state.selectedTab === 'home'}
           onPress={() => {
-              this.setState({
-                  selectedTab: 'welcome',
-              });
+            this.setState({
+              selectedTab: 'home',
+            });
           }}>
-          TEST
-        </TabBarIOS.Item>
-        <TabBarIOS.Item
-          selected={this.state.selectedTab === 'more'}
-          icon={{uri:'contacts'}}
+          {this._renderContent()}
+        </TabBarItemIOS>
+        <TabBarItemIOS
+          name="articles"
+          iconName={'ion|ios-paper-outline'}
+          title={''}
+          iconSize={32}
+          accessibilityLabel="Articles Tab"
+          selected={this.state.selectedTab === 'articles'}
           onPress={() => {
-                this.setState({
-                    selectedTab: 'more',
-                });
+            this.setState({
+              selectedTab: 'articles',
+            });
           }}>
-          TEST
-        </TabBarIOS.Item>
+          {this._renderContent()}
+        </TabBarItemIOS>
+        <TabBarItemIOS
+          name="messages"
+          iconName={'ion|chatboxes'}
+          title={''}
+          iconSize={32}
+          accessibilityLabel="Messages Tab"
+          selected={this.state.selectedTab === 'messages'}
+          onPress={() => {
+            this.setState({
+              selectedTab: 'messages',
+            });
+          }}>
+          {this._renderContent()}
+        </TabBarItemIOS>
+        <TabBarItemIOS
+          name="settings"
+          iconName={'ion|ios-gear'}
+          title={''}
+          iconSize={32}
+          accessibilityLabel="Settings Tab"
+          selected={this.state.selectedTab === 'settings'}
+          onPress={() => {
+            this.setState({
+              selectedTab: 'settings',
+            });
+          }}>
+          <View style={styles.container}>
+            <Text> WHAT</Text>
+          </View>
+        </TabBarItemIOS>
       </TabBarIOS>
     );
   },
@@ -59,16 +101,27 @@ var Footer = React.createClass({
   select(): void {
     // call parent on select
   },
+
+  _renderContent(): $jsx {
+    return (
+      <View style={styles.container}>
+        <Text> TEST</Text>
+      </View>
+    );
+  }
 });
 
 var styles = StyleSheet.create({
+  tabBar: {
+    backgroundColor: '#dfdfdf',
+    flex: 1,
+    color: '#ff0000',
+    tintColor: '#877324'
+  },
   container: {
-    flex: 0,
-    flexDirection: 'row',
+    flex: 1,
     alignItems: 'center',
-    borderTopWidth: .5,
-    backgroundColor: 'green',
-    height: 32,
+    justifyContent: 'center',
   },
 });
 

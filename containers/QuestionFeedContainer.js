@@ -17,6 +17,7 @@ var {
 
 var Button = require('react-native-button');
 var ImageView = require('../components/ImageView');
+var AnswerView = require('../components/AnswerView');
 var Swiper = require('react-native-swiper')
 var TimerMixin = require('react-timer-mixin');
 
@@ -69,7 +70,6 @@ var QuestionFeedContainer = React.createClass({
               Facebook is an open-source framework allowing you
               to ... The vertical position of each child is determined from a combination 
             </Text>
-
           </View>
 
         </ScrollView>
@@ -92,8 +92,8 @@ var QuestionFeedContainer = React.createClass({
 
   answerQuestion(): void {
     this.props.navigator.push({
-      title: 'New',
-      component: QuestionFeedContainer,
+      title: 'Answer',
+      component: AnswerView,
     });
   },
 });

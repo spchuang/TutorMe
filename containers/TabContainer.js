@@ -15,6 +15,7 @@ var {
 } = React;
 
 var QuestionFeedContainer = require('./QuestionFeedContainer');
+var Ask = require('./Ask');
 
 var { Icon, TabBarIOS, Spinner} = require('react-native-icons');
 var TabBarItemIOS = TabBarIOS.Item;
@@ -96,7 +97,13 @@ var TabContainer = React.createClass({
         accessibilityLabel="Messages Tab"
         selected={this.state.selectedTab === TABS.ASK}
         onPress={() => {this.setState({selectedTab: TABS.ASK})}}>
-        {this._renderContent()}
+        <NavigatorIOS
+          style={styles.nav}
+          initialRoute={{
+            title: 'Ask a question',
+            component: Ask,
+          }}
+        />
       </TabBarItemIOS>
     );
   },

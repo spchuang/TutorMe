@@ -8,7 +8,12 @@
   "dependencies": {
     "react-native": "^0.13.1",
     "react-native-icons": "^0.5.1",
+<<<<<<< HEAD
     "react-native-swiper": "^1.3.0",
     "react-timer-mixin": "^0.13.2"
+=======
+    "react-timer-mixin": "^0.13.2",
+    "react-native-button": "^1.2.1"
+>>>>>>> 5146bac10ada4d46eae9da55913e942a841d6502
   }
 }

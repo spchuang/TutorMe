@@ -19,6 +19,7 @@ var {
 var Button = require('react-native-button');
 var ImageView = require('../components/ImageView');
 var AnswerView = require('../components/AnswerView');
+var QuestionView = require('../components/QuestionView');
 var Swiper = require('react-native-swiper');
 
 var Parse = require('parse/react-native');
@@ -134,23 +135,7 @@ var QuestionFeedContainer = React.createClass({
     return (
       <View style={styles.slide}>
         <ScrollView style={styles.scroll}>
-          <View style={styles.title}>
-            <Text style={styles.text}>{question.user} - {question.subject}</Text>
-          </View>
-          <ImageView source={question.image.url()}/>
-
-          <View style={[styles.center, styles.description]}>
-            <Text style={styles.text}> 
-              Facebook is an open-source framework allowing you
-              to ... The vertical position of each child is determined from a combination 
-              Facebook is an open-source framework allowing you
-              to ... The vertical position of each child is determined from a combination 
-              Facebook is an open-source framework allowing you
-            </Text>
-          </View>
-
-          
-
+          <QuestionView question={question}/>
         </ScrollView>
         <View style={[styles.center, styles.footer]}>
           <View style={styles.buttonWrap}>
@@ -192,10 +177,6 @@ var styles = StyleSheet.create({
   scroll: {
     height: 450,
   },
-  description: {
-    padding: 10,
-    backgroundColor: '#28ABE3',
-  },
   footer: {
     backgroundColor: 'transparent',
     marginBottom: 120,
@@ -203,15 +184,6 @@ var styles = StyleSheet.create({
   slide: {
     flex: 1,
     backgroundColor: 'transparent',
-  },
-  title: {
-    backgroundColor: '#28ABE3',
-    padding: 10,
-  },
-  text: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: '500',
   },
 
   buttonWrap: {

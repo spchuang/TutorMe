@@ -33,7 +33,6 @@ var QuestionListView = React.createClass({
     var items = [];
     for (var i = 0; i < this.props.list.length; i++) {
       items.push(this._renderItem(i))
-      
     }
 
     return (
@@ -45,18 +44,19 @@ var QuestionListView = React.createClass({
 
   _renderItem(i: number): $jsx {
     var item = this.props.list[i];
+    console.log(item);
     return (
       <TouchableHighlight
         underlayColor='CCFFFF'
         onPress={()=> this.props.onItemClick(item)}>
         <View style={styles.itemRow}>
           <Image
-            source={{uri: item.get('image').url()}}
+            source={{uri: item.get('image_url')}}
             style={styles.thumbnail}
             resizeMode={Image.resizeMode.contain}/>
           <View style={styles.rightContainer}>
             <Text style={styles.text}>{item.get('subject')}</Text>
-            <Text style={styles.text}>TEST</Text>
+            <Text style={styles.text}>{item.get('text')}</Text>
             <TimeAgo style={styles.text} time={item.get('createdAt')} />
           </View>
         </View>

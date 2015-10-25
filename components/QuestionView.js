@@ -145,9 +145,9 @@ var QuestionView = React.createClass({
   _renderAnswer(i: number): $jsx {
     var answer = this.state.answers[i];
 
-    var image = answer.get('image')
+    var image = answer.get('image_url') !== ''
       ? <ImageView
-          source={answer.get('image').url()}
+          source={answer.get('image_url')}
           height={200}/>
       : null;
     return (

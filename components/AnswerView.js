@@ -15,12 +15,15 @@ var {
   Text,
   ActivityIndicatorIOS,
   TextInput,
+  ScrollView,
 } = React;
 
 var Button = require('react-native-button');
 var Parse = require('parse/react-native');
 var ParseReact = require('parse-react/react-native');
 var QuestionView = require('../components/QuestionView');
+var CameraView = require('./CameraView');
+var UploadImage = require('../utils/camera_upload');
 
 var { Icon, } = require('react-native-icons');
 
@@ -32,7 +35,12 @@ var AnswerView = React.createClass({
     return {
       loading: false,
       text: '',
+      imageUri: '',
     }
+  },
+  containerTouched(event) {
+    this.refs.textInput.blur();
+    return false;
   },
 
   render(): $jsx {
@@ -49,14 +57,17 @@ var AnswerView = React.createClass({
           style={styles.buttonIcon}
         />;
     return (
-      <View style={styles.container}>
-        
+      <ScrollView style={styles.container}
+        onStartShouldSetResponder={this.containerTouched.bind(this)}>
+        <CameraView onImageTaken={this._onCameraImageTaken}/>
+
         <Text>Comments:</Text>
         <TextInput
           style={styles.input}
           onChangeText={(text) => this.setState({text})}
           multiline={true}
           value={this.state.text}
+          ref='textInput' 
         />
         <View style={styles.row}>
           <View style={[styles.buttonWrap, this._disabledStyle(this.state.loading)]}>
@@ -67,8 +78,12 @@ var AnswerView = React.createClass({
             </Button>
           </View>
         </View>
-      </View>
+      </ScrollView>
     );
+  },
+
+  _onCameraImageTaken(uri): void {
+    this.setState({imageUri: uri});
   },
 
   _disabledStyle(disabled: bool): Object {
@@ -80,20 +95,23 @@ var AnswerView = React.createClass({
 
   submitQuestion(): void {
     
-    if (this.state.text === '') {
+    if (this.state.text === '' && this.state.imageUri === '') {
       return;
     }
 
     this.setState({loading: true});
 
-    console.log(this.props.question.id);
-    ParseReact.Mutation.Create('answers', {
-      text: this.state.text,
-      user: 'spchuang',
-      question: this.props.question,
-    }).dispatch()
-    .done(this._onSuccess)
-    .fail(this._onError);
+    UploadImage(this.state.imageUri, (external_image_url) => {
+
+      ParseReact.Mutation.Create('answers', {
+        text: this.state.text,
+        user: 'spchuang',
+        question: this.props.question,
+        image_url: external_image_url,
+      }).dispatch()
+      .done(this._onSuccess)
+      .fail(this._onError);
+    });
   },
 
   _onSuccess(newAnswer: object): void {
@@ -117,12 +135,12 @@ var AnswerView = React.createClass({
 var styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 64,
+    paddingBottom: 50,
   },
   input: {
     fontSize: 20,
     padding: 10,
-    height: 250,
+    height: 150,
     borderColor: 'gray', 
     borderWidth: 1,
   },

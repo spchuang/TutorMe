@@ -69,9 +69,9 @@ var Ask = React.createClass({
 
   getInitialState(): object {
     return {
-      text: "",
+      text: '',
       cameraType: Camera.constants.Type.back,
-      imageUri: "",
+      imageUri: '',
       subject: 'Geometry',
       level: 'high school',
     };
@@ -106,11 +106,9 @@ var Ask = React.createClass({
 
   _onCameraImageTaken(uri): void {
     this.setState({imageUri: uri});
-    console.log(uri);
   },
 
   render(): $jsx {
-
 
     var buttonContent = this.state.submitting
       ? <ActivityIndicatorIOS

@@ -113,7 +113,6 @@ var PersonContainer = React.createClass({
   },
 
   _onClick(question: object): void {
-    console.log(question);
     this.props.navigator.push({
       title: 'Question',
       component: QuestionView,
@@ -152,7 +151,14 @@ var PersonContainer = React.createClass({
           })
           
           questions = questions.filter(n => {return n != undefined }); 
-          this._onSuccess(questions);
+          /*
+          var unique = questions.filter((value, index, self) => {
+
+            return self.indexOf(value.id) === index;
+          });*/
+          console.log(unique);
+
+          this._onSuccess(unique);
         },
         error: this._onError,
       });

@@ -112,6 +112,7 @@ var QuestionView = React.createClass({
   },
 
   _renderAnswers(): $jx {
+    console.log(this.state.answers);
     var answers = [];
     for (var i = 0; i < this.state.answers.length; i++) {
       answers.push(this._renderAnswer(i));
@@ -122,14 +123,17 @@ var QuestionView = React.createClass({
   _renderAnswer(i: number): $jsx {
     var answer = this.state.answers[i];
     
+    var image = answer.get('image')
+      ? <ImageView 
+          source={answer.get('image').url()} 
+          height={200}/>
+      : null;
     return (
       <View>
         <View style={styles.answerTitle}>
           <Text style={styles.text}>{answer.get('user')} answered</Text>
         </View>
-        <ImageView 
-          source={answer.get('image').url()} 
-          height={200}/>
+        {image}
 
         <View style={[styles.center, styles.answerDescription]}>
           <Text style={styles.text}> 

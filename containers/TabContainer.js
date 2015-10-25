@@ -32,7 +32,7 @@ var TABS = {
 var TabContainer = React.createClass({
   getInitialState(): Object {
     return {
-      selectedTab: TABS.PERSON,
+      selectedTab: TABS.QUESTION_FEED,
     };
   },
 

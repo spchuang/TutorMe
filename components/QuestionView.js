@@ -71,16 +71,19 @@ var QuestionView = React.createClass({
       image = question.get('image_url');
     }
 
+    console.log(JSON.stringify(question));
+
     var textView = text
       ? <View style={[styles.center, styles.description]}>
-          <Text style={styles.text}> 
+          <Text style={styles.text}>
             {text}
           </Text>
         </View>
       : null;
 
-    var imageView = !!image
-      ? <ImageView source={image.url()}/>
+      console.log(image);
+    var imageView = image
+      ? <ImageView source={image}/>
       : null;
 
     return (
@@ -93,7 +96,7 @@ var QuestionView = React.createClass({
         {this._renderAnswers()}
       </ScrollView>
     );
-  }, 
+  },
 
   _loadAnswersForQuestion(): void {
     if (this.state.loading || this.state.loaded) {
@@ -141,10 +144,10 @@ var QuestionView = React.createClass({
 
   _renderAnswer(i: number): $jsx {
     var answer = this.state.answers[i];
-    
+
     var image = answer.get('image')
-      ? <ImageView 
-          source={answer.get('image').url()} 
+      ? <ImageView
+          source={answer.get('image').url()}
           height={200}/>
       : null;
     return (
@@ -155,7 +158,7 @@ var QuestionView = React.createClass({
         {image}
 
         <View style={[styles.center, styles.answerDescription]}>
-          <Text style={styles.text}> 
+          <Text style={styles.text}>
             {answer.get('text')}
           </Text>
         </View>

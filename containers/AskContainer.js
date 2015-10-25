@@ -10,7 +10,7 @@ var QuestionView = require('./../components/QuestionView');
 var Button = require('react-native-button');
 var Camera = require('react-native-camera');
 var ImageView = require('../components/ImageView');
-
+var {Icon, } = require('react-native-icons');
 
 var ParseReact = require('parse-react/react-native');
 var QuestionView = require('../components/QuestionView');
@@ -67,17 +67,15 @@ var Ask = React.createClass({
 
   getInitialState(): $jsx {
     return {
-	    text: "",
-	    cameraType: Camera.constants.Type.back,
-	    imageData: "",
-      imageURL: "",
-      captureMode: true,
+      text: "",
+      cameraType: Camera.constants.Type.back,
+      imageUri: "",
       subject: 'Geometry',
       level: 'high school',
     };
   },
 
-  _updateImage(imageData): void {
+  _uploadImage(imageData): void {
     var URL = "http://162.243.138.173:32771/upload";
     var form = new FormData();
     form.append('file', imageData)
@@ -85,24 +83,39 @@ var Ask = React.createClass({
       {body: form,
        method: "post"
       })
-        .then(_onImageSaveSuccess)
+        .then(this._onImageSaveSuccess)
         .done();
   },
 
-  _saveImage()  {
-    this.refs.cam.capture((err, uri) =>
-    {
-      NativeModules.ReadImageData.readImage(uri, (data) => {
-        this._updateImage(data);
+  _submit()  {
+      NativeModules.ReadImageData.readImage(this.state.imageUri, (data) => {
+        this._uploadImage(data);
       });
-    });
   },
 
   _onImageSaveSuccess(response: object): void {
-    this.setState({
-      imageURL : response.imge_urlm,
-      captureMode: false
-    });
+    console.log(JSON.stringify(response));
+    var body = JSON.parse(response._bodyInit);
+    console.log(JSON.stringify(body));
+    ParseReact.Mutation.Create('questions', {
+      text: this.state.text,
+      image_url: "http://162.243.138.173:32771" + body.imge_url,
+      subject: this.state.subject,
+      level: this.state.level,
+      user: 'spchuang',
+    }).dispatch()
+    .done(this._onSuccess)
+    .fail(this._onError);
+  },
+
+  _previewImage()  {
+      this.refs.cam.capture((err, uri) =>
+      {
+        console.log(uri);
+        var state = this.state;
+        state.imageUri=uri;
+        this.setState(state);
+      });
   },
 
   _renderCaptureView(): $jsx {
@@ -111,27 +124,51 @@ var Ask = React.createClass({
 	     <Camera
         ref="cam"
         style={styles.camera}
-       />
-       <TouchableHighlight onPress={this._saveImage} style={style.capture}>
-          <Text>Capture</Text>
+        captureTarget={Camera.constants.CaptureTarget.disk}
+       >
+       <TouchableHighlight style={{flex:1, height:50, justifyContent:'center'}} onPress={this._previewImage}>
+          <Icon
+            name='ion|ios-camera-outline'
+            size={40}
+            color='#887700'
+            style={{width:40, height:40}}
+          />
         </TouchableHighlight>
+
+
+       </Camera>
+
       </View>
     );
+  },
+
+  _reset(): void {
+    var state = this.state;
+    state.imageUri="";
+    this.setState(state);
   },
 
   _renderImagePreview(): $jsx {
     return (
       <View>
-        <ImageView source={this.state.imageURL}/>
+        <ImageView source={this.state.imageUri}/>
+        <TouchableHighlight onPress={this._reset}>
+          <Text>Re Capture</Text>
+        </TouchableHighlight>
       </View>
     );
   },
 
+  _renderPicture(): $jsx {
+    if (this.state.imageUri ==="") {
+      return this._renderCaptureView();
+    } else {
+      return this._renderImagePreview();
+    }
+  },
+
   render(): $jsx {
 
-    var camera = this.state.captureMode
-      ? this._renderCaptureView()
-      : this._renderImagePreview();
 
     var buttonContent = this.state.submitting
       ? <ActivityIndicatorIOS
@@ -144,7 +181,7 @@ var Ask = React.createClass({
     return (
       <View style={styles.container}>
         <ScrollView >
-          {camera}
+          {this._renderPicture()}
           <View style={styles.section}>
             <View style={styles.center}>
               <Text>What subject is it?</Text>
@@ -158,24 +195,12 @@ var Ask = React.createClass({
             </View>
             {this._renderLevelPicker()}
           </View>
-          <View style={styles.section}>
-            <View style={styles.center}>
-              <Text>Comments</Text>
-            </View>
-            <TextInput
-              style={styles.input}
-              onChangeText={(text) => this.setState({text})}
-              multiline={true}
-              value={this.state.text}
-            />
-          </View>
-
         </ScrollView>
         <View style={[styles.center, styles.footer]}>
           <View style={styles.row}>
             <View style={[styles.buttonWrap, this._disabledStyle(this.state.loading)]}>
-              <Button onPress={this._submitQuestion}
-                disabled={this.state.submitting}
+              <Button onPress={this._submit}
+                //disabled={this.state.imageUri}
                 style={styles.button}>
                 {buttonContent}
               </Button>
@@ -207,7 +232,7 @@ var Ask = React.createClass({
       );
     }
     return (
-      <View style={styles.pickerWrap}> 
+      <View style={styles.pickerWrap}>
         <PickerIOS
           selectedValue={this.state.subject}
           onValueChange={(subject) => this.setState({subject})}>
@@ -231,7 +256,7 @@ var Ask = React.createClass({
       );
     }
     return (
-      <View style={styles.pickerWrap}> 
+      <View style={styles.pickerWrap}>
         <PickerIOS
           selectedValue={this.state.level}
           onValueChange={(level) => this.setState({level})}>
@@ -241,26 +266,6 @@ var Ask = React.createClass({
     );
   },
 
-  _submitQuestion(): void{
-    console.log(this.state);
-    if (this.state.submitting || 
-      this.state.subject === '' || 
-      this.state.level === '' ||
-      (this.state.imageURL === '' && this.state.text === '' )) {
-      return;
-    }
-    this.setState({submitting: true});
-
-    ParseReact.Mutation.Create('questions', {
-      text: this.state.text,
-      image_url: this.state.imageURL,
-      subject: this.state.subject,
-      level: this.state.level,
-      user: 'spchuang',
-    }).dispatch()
-    .done(this._onSuccess)
-    .fail(this._onError);
-  },
 
   _onSuccess(newQuestion: object): void {
     this.setState({submitting: false, text: ''});
@@ -283,12 +288,16 @@ var styles = StyleSheet.create({
   }
   container: {
     flex: 1,
+    flexDirection: 'column',
     backgroundColor: '#F5FCFF', //F5FCFF
     paddingTop: 30, //64,
   },
   camera: {
-    flex: 1,
+    flex: 4,
     height : 330,
+    flexDirection : 'column',
+    alignItems : 'flex-end',
+    backgroundColor: 'transparent'
   },
   picker: {
     flex: 1,
@@ -336,7 +345,7 @@ var styles = StyleSheet.create({
     fontSize: 16,
     padding: 5,
     height: 80,
-    borderColor: 'gray', 
+    borderColor: 'gray',
     borderWidth: 1,
   },
 

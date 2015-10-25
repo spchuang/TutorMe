@@ -13,30 +13,18 @@ var {
   Text,
   View,
   ScrollView,
+  ActivityIndicatorIOS,
 } = React;
 
 var Button = require('react-native-button');
 var ImageView = require('../components/ImageView');
 var AnswerView = require('../components/AnswerView');
-var Swiper = require('react-native-swiper')
-var TimerMixin = require('react-timer-mixin');
+var Swiper = require('react-native-swiper');
 
 var Parse = require('parse/react-native');
 var ParseReact = require('parse-react/react-native');
 
 var { Icon, } = require('react-native-icons');
-
-var MOCK_DATA = [
-  {user: 'Mike', subject: 'Chemistry', image: 'http://c.hiphotos.baidu.com/image/w%3D310/sign=0dff10a81c30e924cfa49a307c096e66/7acb0a46f21fbe096194ceb468600c338644ad43.jpg'},
-  {user: 'Sam', subject: 'Calculus', image: 'http://c.hiphotos.baidu.com/image/w%3D310/sign=0dff10a81c30e924cfa49a307c096e66/7acb0a46f21fbe096194ceb468600c338644ad43.jpg'},
-  {user: 'John', subject: 'Chemistry', image: 'http://c.hiphotos.baidu.com/image/w%3D310/sign=0dff10a81c30e924cfa49a307c096e66/7acb0a46f21fbe096194ceb468600c338644ad43.jpg'},
-  {user: 'Jason', subject: 'Algebra', image: 'http://c.hiphotos.baidu.com/image/w%3D310/sign=0dff10a81c30e924cfa49a307c096e66/7acb0a46f21fbe096194ceb468600c338644ad43.jpg'},
-  {user: 'Jack', subject: 'Chemistry', image: 'http://c.hiphotos.baidu.com/image/w%3D310/sign=0dff10a81c30e924cfa49a307c096e66/7acb0a46f21fbe096194ceb468600c338644ad43.jpg'},
-  {user: 'Mike', subject: 'Chemistry', image: 'http://c.hiphotos.baidu.com/image/w%3D310/sign=0dff10a81c30e924cfa49a307c096e66/7acb0a46f21fbe096194ceb468600c338644ad43.jpg'},
-  {user: 'Jordan', subject: 'Physics', image: 'http://c.hiphotos.baidu.com/image/w%3D310/sign=0dff10a81c30e924cfa49a307c096e66/7acb0a46f21fbe096194ceb468600c338644ad43.jpg'},
-  {user: 'Andrew', subject: 'Chemistry', image: 'http://c.hiphotos.baidu.com/image/w%3D310/sign=0dff10a81c30e924cfa49a307c096e66/7acb0a46f21fbe096194ceb468600c338644ad43.jpg'},
-  {user: 'Amy', subject: 'Chemistry', image: 'http://c.hiphotos.baidu.com/image/w%3D310/sign=0dff10a81c30e924cfa49a307c096e66/7acb0a46f21fbe096194ceb468600c338644ad43.jpg'},
-];
 
 var QuestionFeedContainer = React.createClass({
   mixins: [ParseReact.Mixin],
@@ -44,31 +32,47 @@ var QuestionFeedContainer = React.createClass({
     return {
       isLoading: true,
       questions: [],
+      index: 0,
+      loadingAnswers: false,
+      answersCache: {},
     };
   },
 
   observe: function(props, state) {
-    var questionQuery = (new Parse.Query('questions'));
-    return state.isLoading ?  { questions: questionQuery } : null;
+    var query = new Parse.Query('questions');
+    return state.isLoading ?  {questions: query} : null;
   },
 
   componentDidUpdate: function(prevProps, prevState) {
-  if (prevState.isLoading && (this.pendingQueries().length == 0)) {
-      this.setState({ isLoading: false });
-      this.setState({questions: this.data.questions});
+    if (prevState.isLoading && (this.pendingQueries().length == 0)) {
+      if (this.data.questions.length !== 0) {
+        this._loadAnswersForQuestion(this.data.questions[0], 0);
+      }
+
+      this.setState({
+        isLoading: false ,
+        questions: this.data.questions,
+      });
     }
   },
 
   render(): $jsx {
     if (this.state.isLoading) {
       return (
-        <Text> Loading..</Text>
+        <View style={[styles.center, styles.container]}>
+          <ActivityIndicatorIOS
+            animating={true}
+            style={styles.spinner}
+            size="large"
+          />
+        </View>
       );
     }
     return (
       <View style={styles.container}>
         <Swiper style={styles.wrapper} 
           showsButtons={false} 
+          onMomentumScrollEnd={this._onMomentumScrollEnd}
           showsPagination={false}>
           {this._renderQuestions()}
         </Swiper>
@@ -76,12 +80,51 @@ var QuestionFeedContainer = React.createClass({
     );
   },
 
+  _onMomentumScrollEnd(e, state, context): void {
+    var newIndex = state.index;
+    if (newIndex !== this.state.index) {
+      this._loadAnswersForQuestion(
+        this.state.questions[newIndex], 
+        newIndex,
+      );
+
+      this.setState({index: newIndex});
+    }
+  },
+
+  _loadAnswersForQuestion(question: Object, index: number): void {
+    if (this.state.loadingAnswer) {
+      return;
+    }
+
+    this.setState({loadingAnswers: true});
+
+    var query =  new Parse.Query('answers');
+    query.equalTo("question", question);
+    query.find({
+      success: (answers) => {
+        if (answers.length) {
+          var answersCache = this.state.answersCache;
+          answersCache[question.id.objectId] = answers;
+
+          this.setState({
+            answersCache: answersCache,
+          })
+        }
+        this.setState({loadingAnswers: true});
+      },
+      error: () => {
+        console.log("ERROR");
+        this.setState({loadingAnswers: true});
+      }
+    });
+  },
+
   _renderQuestions(): $jsx {
     var questions = [];
     for (var i = 0; i < this.state.questions.length; i++) {
       questions.push(this._renderQuestion(i));
     }
-    console.log(this.state.questions);
     return questions;
   },
 
@@ -96,19 +139,20 @@ var QuestionFeedContainer = React.createClass({
           </View>
           <ImageView source={question.image.url()}/>
 
-          <View style={styles.description}>
+          <View style={[styles.center, styles.description]}>
             <Text style={styles.text}> 
               Facebook is an open-source framework allowing you
               to ... The vertical position of each child is determined from a combination 
               Facebook is an open-source framework allowing you
               to ... The vertical position of each child is determined from a combination 
               Facebook is an open-source framework allowing you
-              to ... The vertical position of each child is determined from a combination 
             </Text>
           </View>
 
+          
+
         </ScrollView>
-        <View style={styles.footer}>
+        <View style={[styles.center, styles.footer]}>
           <View style={styles.buttonWrap}>
             <Button onPress={this.answerQuestion}>
               <Icon
@@ -129,28 +173,32 @@ var QuestionFeedContainer = React.createClass({
     this.props.navigator.push({
       title: 'Answer',
       component: AnswerView,
+      passProps: {question: this.state.questions[this.state.index]},
     });
   },
 });
 
 var styles = StyleSheet.create({
+  spinner: {
+    marginTop: 100,
+  },
+  center: {
+    alignItems: 'center',
+  },
   container: {
     flex: 1,
     paddingTop: 64,
-    
   },
   scroll: {
     height: 450,
   },
   description: {
-    alignItems: 'center',
     padding: 10,
     backgroundColor: '#28ABE3',
   },
   footer: {
     backgroundColor: 'transparent',
     marginBottom: 120,
-    alignItems: 'center',
   },
   slide: {
     flex: 1,

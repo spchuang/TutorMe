@@ -44,7 +44,7 @@ var QuestionListView = React.createClass({
 
   _renderItem(i: number): $jsx {
     var item = this.props.list[i];
-    
+
     return (
       <TouchableHighlight
         underlayColor='CCFFFF'

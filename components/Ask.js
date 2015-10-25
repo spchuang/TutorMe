@@ -27,30 +27,34 @@ var Ask = React.createClass({
     return {
 	    text: "",
 	    cameraType: Camera.constants.Type.back,
-	    imageData: "",
+	    imageUri: "",
     };
   },
 
-  _send(imageData): void {
-    var URL = "http://162.243.138.173:32771/upload";
-    var form = new FormData();
-    form.append('file', imageData)
-    fetch(URL,
-      {body: form,
-       method: "post"
-      })
+  _send(): void {
+    NativeModules.ReadImageData.readImage(this.state.imageUri, (data) => {
+      console.log(data);
+      var URL = "http://162.243.138.173:32771/upload";
+      var form = new FormData();
+      form.append('file', data);
+      fetch(URL,
+        {
+          body: form,
+          method: "post",
+          headers: {"Content-Type": "multipart/FormData"}
+        })
           .then((response) => {console.log(JSON.stringify(response));})
           .done();
+    });
   },
 
-  _saveImage()  {
+  _previewImage()  {
       this.refs.cam.capture((err, uri) =>
       {
         console.log(uri);
-        NativeModules.ReadImageData.readImage(uri, (data) => {
-          console.log(data);
-          this._send(data);
-        });
+        var state = this.state;
+        state.imageUri=uri;
+        this.setState(state);
       });
   },
 
@@ -60,51 +64,59 @@ var Ask = React.createClass({
 	     <Camera
         ref="cam"
         style={styles.camera}
+        captureTarget={Camera.constants.CaptureTarget.disk}
        />
-       <TouchableHighlight onPress={this._saveImage}>
+       <TouchableHighlight onPress={this._previewImage}>
           <Text>Capture</Text>
         </TouchableHighlight>
       </View>
     );
   },
 
+  _reset(): void {
+    var state = this.state;
+    state.imageUri="";
+    this.setState(state);
+  },
+
   _previewView(): $jsx {
     return (
       <View style={styles.container}>
-	     <Camera>
-	      <TouchableHighlight onPress={this._onPressButton}>
-          <Text>
-            Capture
-          </Text>
-	      </TouchableHighlight>
-      </Camera>
+        <Image style={styles.camera}
+          source={{uri: this.state.imageUri}}/>
+        <TouchableHighlight onPress={this._reset}>
+          <Text>Re Capture</Text>
+        </TouchableHighlight>
+
+        <TouchableHighlight onPress={this._send}>
+          <Text>Submit</Text>
+        </TouchableHighlight>
+
      </View>
     );
   },
 
+  _renderPicture(): $jsx {
+    if (this.state.imageUri ==="") {
+      return this._captureView();
+    } else {
+      return this._previewView(this.state.imageUri);
+    }
+  },
+
   render(): $jsx {
+
     return (
       <View style={styles.container}>
-
+      {this._renderPicture()}
       <TextInput
-        style={{height: 50, borderColor: 'gray', borderWidth: 1}}
+        style={{height: 50, borderBottomColor: 'gray', borderBottomWidth: 1}}
         onChangeText={
           (text) => {
-            state = this.state
-            state.text = text
-            this.setState(state)
+            this.state.text = text;
           }
         }
-        value={this.state.text}
       />
-
-      {this._captureView()}
-
-
-      <Button style={{color: 'green'}} onPress={this._handlePress}>
-        Submit!
-      </Button>
-
       </View>
     );
   },
@@ -119,7 +131,7 @@ var styles = StyleSheet.create({
     paddingTop: 64,
   },
   camera: {
-    width : 350,
+    width : 380,
     height : 350,
   },
   thumbnail: {

@@ -156,9 +156,8 @@ var PersonContainer = React.createClass({
 
             return self.indexOf(value.id) === index;
           });*/
-          console.log(unique);
 
-          this._onSuccess(unique);
+          this._onSuccess(questions);
         },
         error: this._onError,
       });

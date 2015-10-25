@@ -17,7 +17,6 @@ var {
 } = React;
 
 var Button = require('react-native-button');
-var ImageView = require('../components/ImageView');
 var AnswerView = require('../components/AnswerView');
 var QuestionView = require('../components/QuestionView');
 var Swiper = require('react-native-swiper');
@@ -34,8 +33,6 @@ var QuestionFeedContainer = React.createClass({
       isLoading: true,
       questions: [],
       index: 0,
-      loadingAnswers: false,
-      answersCache: {},
     };
   },
 
@@ -46,10 +43,6 @@ var QuestionFeedContainer = React.createClass({
 
   componentDidUpdate: function(prevProps, prevState) {
     if (prevState.isLoading && (this.pendingQueries().length == 0)) {
-      if (this.data.questions.length !== 0) {
-        this._loadAnswersForQuestion(this.data.questions[0], 0);
-      }
-
       this.setState({
         isLoading: false ,
         questions: this.data.questions,
@@ -84,41 +77,8 @@ var QuestionFeedContainer = React.createClass({
   _onMomentumScrollEnd(e, state, context): void {
     var newIndex = state.index;
     if (newIndex !== this.state.index) {
-      this._loadAnswersForQuestion(
-        this.state.questions[newIndex], 
-        newIndex,
-      );
-
       this.setState({index: newIndex});
     }
-  },
-
-  _loadAnswersForQuestion(question: Object, index: number): void {
-    if (this.state.loadingAnswer) {
-      return;
-    }
-
-    this.setState({loadingAnswers: true});
-
-    var query =  new Parse.Query('answers');
-    query.equalTo("question", question);
-    query.find({
-      success: (answers) => {
-        if (answers.length) {
-          var answersCache = this.state.answersCache;
-          answersCache[question.id.objectId] = answers;
-
-          this.setState({
-            answersCache: answersCache,
-          })
-        }
-        this.setState({loadingAnswers: true});
-      },
-      error: () => {
-        console.log("ERROR");
-        this.setState({loadingAnswers: true});
-      }
-    });
   },
 
   _renderQuestions(): $jsx {
@@ -135,11 +95,14 @@ var QuestionFeedContainer = React.createClass({
     return (
       <View style={styles.slide}>
         <ScrollView style={styles.scroll}>
-          <QuestionView question={question}/>
+          <QuestionView 
+            question={question}
+            load={this.state.index === i}
+            />
         </ScrollView>
         <View style={[styles.center, styles.footer]}>
           <View style={styles.buttonWrap}>
-            <Button onPress={this.answerQuestion}>
+            <Button onPress={this._onAnswerQuestionClick}>
               <Icon
                 name='ion|android-send'
                 size={30}
@@ -154,7 +117,7 @@ var QuestionFeedContainer = React.createClass({
     );
   },
 
-  answerQuestion(): void {
+  _onAnswerQuestionClick(): void {
     this.props.navigator.push({
       title: 'Answer',
       component: AnswerView,

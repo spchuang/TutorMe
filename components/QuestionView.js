@@ -13,25 +13,43 @@ var {
   PropTypes,
   Text,
   View,
-  ScrollView,
   ActivityIndicatorIOS,
 } = React;
 
 var Button = require('react-native-button');
 var ImageView = require('../components/ImageView');
-var AnswerView = require('../components/AnswerView');
-var Swiper = require('react-native-swiper');
 
 var Parse = require('parse/react-native');
 var ParseReact = require('parse-react/react-native');
 
 var { Icon, } = require('react-native-icons');
 
-
 var QuestionView = React.createClass({
 
   propTypes: {
     question: PropTypes.object.isRequired,
+    // if this is true, load the answers
+    load: PropTypes.bool,
+  },
+
+  getInitialState(): object {
+    return {
+      loading: false,
+      answers: [],
+      loaded: false,
+    }
+  },
+
+  componentWillMount(): void {
+    if (this.props.load) {
+      this._loadAnswersForQuestion();
+    }
+  },
+
+  componentWillReceiveProps(nextProps: Object): void {
+    if (nextProps.load) {
+      this._loadAnswersForQuestion();
+    }
   },
 
   render(): $jsx {
@@ -54,7 +72,47 @@ var QuestionView = React.createClass({
         </View>
       </View>
     );
-  },  
+  }, 
+
+  _loadAnswersForQuestion(): void {
+    if (this.state.loading || this.state.loaded) {
+      return;
+    }
+
+    this.setState({loading: true});
+
+    var query =  new Parse.Query('answers');
+    query.equalTo("question", this.props.question);
+    query.find({
+      success: this._onSuccess,
+      error: this._onError,
+    });
+  },
+
+  _onSuccess(answers): void {
+    /*
+    if (answers.length) {
+        var answersCache = this.state.answersCache;
+        answersCache[question.id.objectId] = answers;
+
+        this.setState({
+          answersCache: answersCache,
+        })
+      }
+    */
+    console.log(answers);
+
+    this.setState({loading: false, loaded: true, answers: answers});
+  },
+
+  _onError(): void {
+    console.log("ERROR");
+        this.setState({loading: false});
+  },
+
+  _renderAnswers(): $jsx {
+
+  },
 });
 
 var styles = StyleSheet.create({

@@ -16,7 +16,7 @@ var {
 
 var QuestionFeedContainer = require('./QuestionFeedContainer');
 var PersonContainer = require('./PersonContainer');
-var Ask = require('../components/Ask');
+var AskContainer = require('./AskContainer');
 
 var { Icon, TabBarIOS, Spinner} = require('react-native-icons');
 var TabBarItemIOS = TabBarIOS.Item;
@@ -32,7 +32,7 @@ var TABS = {
 var TabContainer = React.createClass({
   getInitialState(): Object {
     return {
-      selectedTab: TABS.QUESTION_FEED,
+      selectedTab: TABS.ASK,
     };
   },
 
@@ -104,7 +104,15 @@ var TabContainer = React.createClass({
         accessibilityLabel="Messages Tab"
         selected={this.state.selectedTab === TABS.ASK}
         onPress={() => {this.setState({selectedTab: TABS.ASK})}}>
-        <Ask />
+
+        <NavigatorIOS
+          style={styles.nav}
+          navigationBarHidden={true}
+          initialRoute={{
+            title: '',
+            component: AskContainer,
+          }}
+        />
       </TabBarItemIOS>
     );
   },

@@ -18,7 +18,7 @@ var {
 } = React;
 
 var Button = require('react-native-button');
-var ImageView = require('../components/ImageView');
+var ImageView = require('./ImageView');
 
 var Parse = require('parse/react-native');
 var ParseReact = require('parse-react/react-native');
@@ -54,23 +54,42 @@ var QuestionView = React.createClass({
   render(): $jsx {
     var question = this.props.question;
 
+    var text = null;
+    var user = null;
+    var subject = null;
+    var image = null;
+    // hacky fix
+    if (question.user) {
+      text = question.text ;
+      user = question.user ;
+      subject = question.subject;
+      image = question.image_url ;
+    } else {
+      text = question.get('text');
+      user = question.get('user');
+      subject = question.get('subject');
+      image = question.get('image_url');
+    }
+
+    var textView = text
+      ? <View style={[styles.center, styles.description]}>
+          <Text style={styles.text}> 
+            {text}
+          </Text>
+        </View>
+      : null;
+
+    var imageView = !!image
+      ? <ImageView source={image.url()}/>
+      : null;
+
     return (
       <ScrollView style={this.props.style}>
         <View style={styles.title}>
-          <Text style={styles.text}>{question.get('user')} - {question.get('subject')}</Text>
+          <Text style={styles.text}>{user} - {subject}</Text>
         </View>
-        <ImageView source={question.get('image').url()}/>
-
-        <View style={[styles.center, styles.description]}>
-          <Text style={styles.text}> 
-            Facebook is an open-source framework allowing you
-            to ... The vertical position of each child is determined from a combination 
-            Facebook is an open-source framework allowing you
-            to ... The vertical position of each child is determined from a combination 
-            Facebook is an open-source framework allowing you
-          </Text>
-        </View>
-
+        {imageView}
+        {textView}
         {this._renderAnswers()}
       </ScrollView>
     );

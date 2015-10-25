@@ -22,8 +22,6 @@ var ImageView = require('../components/ImageView');
 var Parse = require('parse/react-native');
 var ParseReact = require('parse-react/react-native');
 
-var { Icon, } = require('react-native-icons');
-
 var QuestionView = React.createClass({
 
   propTypes: {
@@ -70,6 +68,8 @@ var QuestionView = React.createClass({
             Facebook is an open-source framework allowing you
           </Text>
         </View>
+
+        {this._renderAnswers()}
       </View>
     );
   }, 
@@ -100,18 +100,41 @@ var QuestionView = React.createClass({
         })
       }
     */
-    console.log(answers);
 
     this.setState({loading: false, loaded: true, answers: answers});
   },
 
   _onError(): void {
-    console.log("ERROR");
-        this.setState({loading: false});
+    this.setState({loading: false});
   },
 
-  _renderAnswers(): $jsx {
+  _renderAnswers(): $jx {
+    var answers = [];
+    for (var i = 0; i < this.state.answers.length; i++) {
+      answers.push(this._renderAnswer(i));
+    }
+    return answers;
+  },
 
+  _renderAnswer(i: number): $jsx {
+    var answer = this.state.answers[i];
+    
+    return (
+      <View>
+        <View style={styles.answerTitle}>
+          <Text style={styles.text}>{answer.get('user')} answered</Text>
+        </View>
+        <ImageView 
+          source={answer.get('image').url()} 
+          height={200}/>
+
+        <View style={[styles.center, styles.answerDescription]}>
+          <Text style={styles.text}> 
+            {answer.get('text')}
+          </Text>
+        </View>
+      </View>
+    );
   },
 });
 
@@ -132,6 +155,15 @@ var styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '500',
   },
+
+  answerTitle: {
+    backgroundColor: '#E8B71A',
+    padding: 10,
+  },
+  answerDescription: {
+    padding: 10,
+    backgroundColor: '#E8B71A',
+  }
 });
 
 module.exports = QuestionView;

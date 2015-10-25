@@ -30,7 +30,7 @@ var QuestionFeedContainer = React.createClass({
   mixins: [ParseReact.Mixin],
   getInitialState(): Object {
     return {
-      isLoading: true,
+      loading: true,
       questions: [],
       index: 0,
     };
@@ -38,20 +38,20 @@ var QuestionFeedContainer = React.createClass({
 
   observe: function(props, state) {
     var query = new Parse.Query('questions');
-    return state.isLoading ?  {questions: query} : null;
+    return state.loading ?  {questions: query} : null;
   },
 
   componentDidUpdate: function(prevProps, prevState) {
-    if (prevState.isLoading && (this.pendingQueries().length == 0)) {
+    if (prevState.loading && (this.pendingQueries().length == 0)) {
       this.setState({
-        isLoading: false ,
+        loading: false ,
         questions: this.data.questions,
       });
     }
   },
 
   render(): $jsx {
-    if (this.state.isLoading) {
+    if (this.state.loading) {
       return (
         <View style={[styles.center, styles.container]}>
           <ActivityIndicatorIOS

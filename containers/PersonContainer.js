@@ -140,7 +140,6 @@ var PersonContainer = React.createClass({
         error: this._onError,
       });
     } else {
-      console.log("THIS?");
       query = (new Parse.Query('answers'))
         .equalTo("user", 'spchuang');
 
@@ -151,6 +150,8 @@ var PersonContainer = React.createClass({
           var questions = answers.map((answer) => {
             return answer.get('question');
           })
+          
+          questions = questions.filter(n => {return n != undefined }); 
           this._onSuccess(questions);
         },
         error: this._onError,

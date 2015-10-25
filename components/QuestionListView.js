@@ -32,7 +32,8 @@ var QuestionListView = React.createClass({
   render(): $jsx {
     var items = [];
     for (var i = 0; i < this.props.list.length; i++) {
-      items.push(this._renderItem(i));
+      items.push(this._renderItem(i))
+      
     }
 
     return (
@@ -44,7 +45,6 @@ var QuestionListView = React.createClass({
 
   _renderItem(i: number): $jsx {
     var item = this.props.list[i];
-    
     return (
       <TouchableHighlight
         underlayColor='CCFFFF'

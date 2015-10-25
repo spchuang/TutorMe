@@ -112,7 +112,7 @@ var Ask = React.createClass({
         ref="cam"
         style={styles.camera}
        />
-       <TouchableHighlight onPress={this._saveImage}>
+       <TouchableHighlight onPress={this._saveImage} style={style.capture}>
           <Text>Capture</Text>
         </TouchableHighlight>
       </View>
@@ -278,6 +278,9 @@ var Ask = React.createClass({
 
 
 var styles = StyleSheet.create({
+  capture: {
+    
+  }
   container: {
     flex: 1,
     backgroundColor: '#F5FCFF', //F5FCFF

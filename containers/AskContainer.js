@@ -14,6 +14,8 @@ var {Icon, } = require('react-native-icons');
 
 var ParseReact = require('parse-react/react-native');
 var QuestionView = require('../components/QuestionView');
+var CameraView = require('../components/CameraView');
+var UploadImage = require('../utils/camera_upload');
 
 var {
   ActivityIndicatorIOS,
@@ -65,7 +67,7 @@ var LEVELS = [
 
 var Ask = React.createClass({
 
-  getInitialState(): $jsx {
+  getInitialState(): object {
     return {
       text: "",
       cameraType: Camera.constants.Type.back,
@@ -75,71 +77,25 @@ var Ask = React.createClass({
     };
   },
 
-  _uploadImage(imageData): void {
-    var URL = "http://162.243.138.173:32771/upload";
-    var form = new FormData();
-    form.append('file', imageData)
-    fetch(URL,
-      {body: form,
-       method: "post"
-      })
-        .then(this._onImageSaveSuccess)
-        .done();
-  },
-
   _submit()  {
-      NativeModules.ReadImageData.readImage(this.state.imageUri, (data) => {
-        this._uploadImage(data);
-      });
-  },
+    console.log(this.state);
+    if (this.state.submitting || !this.state.imageUri ) {
+      return;
+    }
 
-  _onImageSaveSuccess(response: object): void {
-    console.log(JSON.stringify(response));
-    var body = JSON.parse(response._bodyInit);
-    console.log(JSON.stringify(body));
-    ParseReact.Mutation.Create('questions', {
-      text: this.state.text,
-      image_url: "http://162.243.138.173:32771" + body.imge_url,
-      subject: this.state.subject,
-      level: this.state.level,
-      user: 'spchuang',
-    }).dispatch()
-    .done(this._onSuccess)
-    .fail(this._onError);
-  },
+    this.setState({submitting: true});
+    UploadImage(this.state.imageUri, (external_image_url) => {
 
-  _previewImage()  {
-      this.refs.cam.capture((err, uri) =>
-      {
-        console.log(uri);
-        var state = this.state;
-        state.imageUri=uri;
-        this.setState(state);
-      });
-  },
-
-  _renderCaptureView(): $jsx {
-    return (
-      <View>
-	     <Camera
-        ref="cam"
-        style={styles.camera}
-        captureTarget={Camera.constants.CaptureTarget.disk}
-       >
-       <TouchableHighlight style={{flex:1, height:50, justifyContent:'center'}} onPress={this._previewImage}>
-          <Icon
-            name='ion|ios-camera-outline'
-            size={40}
-            color='#887700'
-            style={{width:40, height:40}}
-          />
-        </TouchableHighlight>
-
-
-       </Camera>
-
-      </View>
-    );
+      ParseReact.Mutation.Create('questions', {
+        text: this.state.text,
+        image_url: external_image_url,
+        subject: this.state.subject,
+        levels: this.state.level,
+        user: 'spchuang',
+      }).dispatch()
+      .done(this._onSuccess)
+      .fail(this._onError);
+    })
   },
 
   _reset(): void {
@@ -148,23 +104,9 @@ var Ask = React.createClass({
     this.setState(state);
   },
 
-  _renderImagePreview(): $jsx {
-    return (
-      <View>
-        <ImageView source={this.state.imageUri}/>
-        <TouchableHighlight onPress={this._reset}>
-          <Text>Re Capture</Text>
-        </TouchableHighlight>
-      </View>
-    );
-  },
-
-  _renderPicture(): $jsx {
-    if (this.state.imageUri ==="") {
-      return this._renderCaptureView();
-    } else {
-      return this._renderImagePreview();
-    }
+  _onCameraImageTaken(uri): void {
+    this.setState({imageUri: uri});
+    console.log(uri);
   },
 
   render(): $jsx {
@@ -177,30 +119,46 @@ var Ask = React.createClass({
           size="small"
         />
       : <Text style={styles.buttonText}>Ask!</Text> ;
+     
 
     return (
       <View style={styles.container}>
-        <ScrollView >
-          {this._renderPicture()}
+        <ScrollView>
+          <CameraView onImageTaken={this._onCameraImageTaken}/>
+         
           <View style={styles.section}>
             <View style={styles.center}>
-              <Text>What subject is it?</Text>
+              <Text>Comments</Text>
             </View>
-            {this._renderSubjectPicker()}
+            <TextInput
+              style={styles.input}
+              onChangeText={(text) => this.setState({text})}
+              multiline={true}
+              value={this.state.text}
+            />
           </View>
 
-          <View style={styles.section}>
-            <View style={styles.center}>
-              <Text>What level is it?</Text>
+          <View style={[styles.section, {flexDirection: 'row',}]}>
+            <View style={{flex: 1}}>
+              <View style={styles.center}>
+                <Text>What subject is it?</Text>
+              </View>
+              {this._renderSubjectPicker()}
             </View>
-            {this._renderLevelPicker()}
+            <View style={{flex: 1}}>
+              <View style={styles.center}>
+                <Text>What level is it?</Text>
+              </View>
+              {this._renderLevelPicker()}
+            </View>
           </View>
+
         </ScrollView>
         <View style={[styles.center, styles.footer]}>
           <View style={styles.row}>
             <View style={[styles.buttonWrap, this._disabledStyle(this.state.loading)]}>
               <Button onPress={this._submit}
-                //disabled={this.state.imageUri}
+                disabled={this.state.submitting}
                 style={styles.button}>
                 {buttonContent}
               </Button>
@@ -283,9 +241,7 @@ var Ask = React.createClass({
 
 
 var styles = StyleSheet.create({
-  capture: {
-    
-  }
+  
   container: {
     flex: 1,
     flexDirection: 'column',
@@ -294,7 +250,7 @@ var styles = StyleSheet.create({
   },
   camera: {
     flex: 4,
-    height : 330,
+    height : 300,
     flexDirection : 'column',
     alignItems : 'flex-end',
     backgroundColor: 'transparent'
@@ -318,13 +274,12 @@ var styles = StyleSheet.create({
   buttonWrap: {
     borderRadius: 8,
     padding: 10,
-
     width: 200,
     backgroundColor: '#DB3340',
     alignItems: 'center',
   },
   section: {
-    paddingTop: 7,
+    paddingTop: 20,
   },
   row: {
     alignItems: 'center',

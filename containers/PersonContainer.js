@@ -113,7 +113,6 @@ var PersonContainer = React.createClass({
   },
 
   _onClick(question: object): void {
-    console.log(question);
     this.props.navigator.push({
       title: 'Question',
       component: QuestionView,
@@ -140,7 +139,6 @@ var PersonContainer = React.createClass({
         error: this._onError,
       });
     } else {
-      console.log("THIS?");
       query = (new Parse.Query('answers'))
         .equalTo("user", 'spchuang');
 
@@ -151,7 +149,16 @@ var PersonContainer = React.createClass({
           var questions = answers.map((answer) => {
             return answer.get('question');
           })
-          this._onSuccess(questions);
+          
+          questions = questions.filter(n => {return n != undefined }); 
+          /*
+          var unique = questions.filter((value, index, self) => {
+
+            return self.indexOf(value.id) === index;
+          });*/
+          console.log(unique);
+
+          this._onSuccess(unique);
         },
         error: this._onError,
       });

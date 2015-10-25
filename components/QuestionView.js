@@ -18,7 +18,7 @@ var {
 } = React;
 
 var Button = require('react-native-button');
-var ImageView = require('../components/ImageView');
+var ImageView = require('./ImageView');
 
 var Parse = require('parse/react-native');
 var ParseReact = require('parse-react/react-native');
@@ -54,27 +54,49 @@ var QuestionView = React.createClass({
   render(): $jsx {
     var question = this.props.question;
 
+    var text = null;
+    var user = null;
+    var subject = null;
+    var image = null;
+    // hacky fix
+    if (question.user) {
+      text = question.text ;
+      user = question.user ;
+      subject = question.subject;
+      image = question.image_url ;
+    } else {
+      text = question.get('text');
+      user = question.get('user');
+      subject = question.get('subject');
+      image = question.get('image_url');
+    }
+
+    console.log(JSON.stringify(question));
+
+    var textView = text
+      ? <View style={[styles.center, styles.description]}>
+          <Text style={styles.text}>
+            {text}
+          </Text>
+        </View>
+      : null;
+
+      console.log(image);
+    var imageView = image
+      ? <ImageView source={image}/>
+      : null;
+
     return (
       <ScrollView style={this.props.style}>
         <View style={styles.title}>
-          <Text style={styles.text}>{question.get('user')} - {question.get('subject')}</Text>
+          <Text style={styles.text}>{user} - {subject}</Text>
         </View>
-        <ImageView source={question.get('image').url()}/>
-
-        <View style={[styles.center, styles.description]}>
-          <Text style={styles.text}> 
-            Facebook is an open-source framework allowing you
-            to ... The vertical position of each child is determined from a combination 
-            Facebook is an open-source framework allowing you
-            to ... The vertical position of each child is determined from a combination 
-            Facebook is an open-source framework allowing you
-          </Text>
-        </View>
-
+        {imageView}
+        {textView}
         {this._renderAnswers()}
       </ScrollView>
     );
-  }, 
+  },
 
   _loadAnswersForQuestion(): void {
     if (this.state.loading || this.state.loaded) {
@@ -112,6 +134,7 @@ var QuestionView = React.createClass({
   },
 
   _renderAnswers(): $jx {
+    console.log(this.state.answers);
     var answers = [];
     for (var i = 0; i < this.state.answers.length; i++) {
       answers.push(this._renderAnswer(i));
@@ -121,18 +144,21 @@ var QuestionView = React.createClass({
 
   _renderAnswer(i: number): $jsx {
     var answer = this.state.answers[i];
-    
+
+    var image = answer.get('image')
+      ? <ImageView
+          source={answer.get('image').url()}
+          height={200}/>
+      : null;
     return (
       <View>
         <View style={styles.answerTitle}>
           <Text style={styles.text}>{answer.get('user')} answered</Text>
         </View>
-        <ImageView 
-          source={answer.get('image').url()} 
-          height={200}/>
+        {image}
 
         <View style={[styles.center, styles.answerDescription]}>
-          <Text style={styles.text}> 
+          <Text style={styles.text}>
             {answer.get('text')}
           </Text>
         </View>

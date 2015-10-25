@@ -20,6 +20,7 @@ var {
 var Button = require('react-native-button');
 var Parse = require('parse/react-native');
 var ParseReact = require('parse-react/react-native');
+var QuestionView = require('../components/QuestionView');
 
 var { Icon, } = require('react-native-icons');
 
@@ -78,17 +79,18 @@ var AnswerView = React.createClass({
   },
 
   submitQuestion(): void {
-
+    
     if (this.state.text === '') {
       return;
     }
 
     this.setState({loading: true});
 
+    console.log(this.props.question.id);
     ParseReact.Mutation.Create('answers', {
       text: this.state.text,
       user: 'spchuang',
-      question: this.props.question.id.objectId,
+      question: this.props.question,
     }).dispatch()
     .done(this._onSuccess)
     .fail(this._onError);
@@ -97,9 +99,12 @@ var AnswerView = React.createClass({
   _onSuccess(newAnswer: object): void {
     
     this.setState({loading: false, text: ''});
-
+    this.props.navigator.replace({
+      title: 'Question',
+      component: QuestionView,
+      passProps: {question: this.props.question, load: true},
+    });
     // go to previous page
-    console.log("GOOD");
   },
 
   _onError(data): void {

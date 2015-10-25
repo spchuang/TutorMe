@@ -131,7 +131,7 @@ var Ask = React.createClass({
 
     var camera = this.state.captureMode
       ? this._renderCaptureView()
-      : _renderImagePreview();
+      : this._renderImagePreview();
 
     var buttonContent = this.state.submitting
       ? <ActivityIndicatorIOS

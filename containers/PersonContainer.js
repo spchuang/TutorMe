@@ -24,6 +24,7 @@ var Button = require('react-native-button');
 var Parse = require('parse/react-native');
 var ParseReact = require('parse-react/react-native');
 
+var QuestionView = require('../components/QuestionView');
 var QuestionListView = require('../components/QuestionListView');
 
 var TABS = {
@@ -48,8 +49,8 @@ var PersonContainer = React.createClass({
     this._query();
   },
 
-  componentWillUpdate(nextProps: object, nextState: object): void {
-    if (nextState.selected !== this.state.selected) {
+  componentDidUpdate(prevProps: object, prevStates: object): void {
+    if (prevStates.selected !== this.state.selected) {
       this._query();
     }
   },
@@ -112,6 +113,12 @@ var PersonContainer = React.createClass({
   },
 
   _onClick(question: object): void {
+    console.log(question);
+    this.props.navigator.push({
+      title: 'Question',
+      component: QuestionView,
+      passProps: {question: question, load: true},
+    });
 
   },
 
@@ -121,12 +128,34 @@ var PersonContainer = React.createClass({
     }
 
     this.setState({loading: true});
+    var query;
 
-    var query = new Parse.Query('questions');
-    query.find({
-      success: this._onSuccess,
-      error: this._onError,
-    });
+    if (this.state.selected === TABS.QUESTIONS) {
+      query = (new Parse.Query('questions'))
+        .equalTo('user', 'spchuang')
+        .descending("updatedAt");
+
+      query.find({
+        success: this._onSuccess,
+        error: this._onError,
+      });
+    } else {
+      console.log("THIS?");
+      query = (new Parse.Query('answers'))
+        .equalTo("user", 'spchuang');
+
+      query.find({
+        success: (answers) => {
+
+          // filter out the question ids
+          var questions = answers.map((answer) => {
+            return answer.get('question');
+          })
+          this._onSuccess(questions);
+        },
+        error: this._onError,
+      });
+    }
   },
 
   _onSuccess(list: array): void {
@@ -164,8 +193,8 @@ var styles = StyleSheet.create({
   },
   headerItem: {
     flex: 1,
-    paddingTop: 8,
-    paddingBottom: 8,
+    paddingTop: 5,
+    paddingBottom: 5,
     alignItems: 'center',
   },
   text: {

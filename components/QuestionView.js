@@ -12,6 +12,7 @@ var {
   StyleSheet,
   PropTypes,
   Text,
+  ScrollView,
   View,
   ActivityIndicatorIOS,
 } = React;
@@ -52,12 +53,13 @@ var QuestionView = React.createClass({
 
   render(): $jsx {
     var question = this.props.question;
+
     return (
-      <View>
+      <ScrollView style={this.props.style}>
         <View style={styles.title}>
-          <Text style={styles.text}>{question.user} - {question.subject}</Text>
+          <Text style={styles.text}>{question.get('user')} - {question.get('subject')}</Text>
         </View>
-        <ImageView source={question.image.url()}/>
+        <ImageView source={question.get('image').url()}/>
 
         <View style={[styles.center, styles.description]}>
           <Text style={styles.text}> 
@@ -70,7 +72,7 @@ var QuestionView = React.createClass({
         </View>
 
         {this._renderAnswers()}
-      </View>
+      </ScrollView>
     );
   }, 
 
@@ -81,8 +83,9 @@ var QuestionView = React.createClass({
 
     this.setState({loading: true});
 
-    var query =  new Parse.Query('answers');
-    query.equalTo("question", this.props.question);
+    var query =  (new Parse.Query('answers'))
+      .ascending("updatedAt")
+      .equalTo("question", this.props.question);
     query.find({
       success: this._onSuccess,
       error: this._onError,

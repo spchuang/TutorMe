@@ -27,27 +27,40 @@ var ParseReact = require('parse-react/react-native');
 var { Icon, } = require('react-native-icons');
 
 var QuestionFeedContainer = React.createClass({
-  mixins: [ParseReact.Mixin],
   getInitialState(): Object {
     return {
-      loading: true,
+      loading: false,
       questions: [],
       index: 0,
     };
   },
 
-  observe: function(props, state) {
-    var query = new Parse.Query('questions');
-    return state.loading ?  {questions: query} : null;
+  componentWillMount(): void {
+    this._query();
   },
 
-  componentDidUpdate: function(prevProps, prevState) {
-    if (prevState.loading && (this.pendingQueries().length == 0)) {
-      this.setState({
-        loading: false ,
-        questions: this.data.questions,
-      });
+  _query(): void {
+    if (this.state.loading) {
+      return;
     }
+
+    this.setState({loading: true});
+
+    var query = (new Parse.Query('questions'))
+      .descending("updatedAt");
+    query.find({
+      success: this._onSuccess,
+      error: ()=> {
+        console.log("ERROR!");
+      },
+    });
+  },
+
+  _onSuccess(questions: array): void {
+    this.setState({
+      loading: false ,
+      questions: questions,
+    });
   },
 
   render(): $jsx {
@@ -94,12 +107,11 @@ var QuestionFeedContainer = React.createClass({
     
     return (
       <View style={styles.slide}>
-        <ScrollView style={styles.scroll}>
-          <QuestionView 
-            question={question}
-            load={this.state.index === i}
-            />
-        </ScrollView>
+        <QuestionView 
+          question={question}
+          load={this.state.index === i}
+          styles={styles.scroll}
+          />
         <View style={[styles.center, styles.footer]}>
           <View style={styles.buttonWrap}>
             <Button onPress={this._onAnswerQuestionClick}>

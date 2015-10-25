@@ -19,6 +19,7 @@ var {
 
 var Button = require('react-native-button');
 var ImageView = require('./ImageView');
+var TimeAgo = require('react-native-timeago');
 
 var { Icon, } = require('react-native-icons');
 
@@ -43,17 +44,20 @@ var QuestionListView = React.createClass({
 
   _renderItem(i: number): $jsx {
     var item = this.props.list[i];
+    
     return (
       <TouchableHighlight
-        underlayColor='CCFFFF'>
+        underlayColor='CCFFFF'
+        onPress={()=> this.props.onItemClick(item)}>
         <View style={styles.itemRow}>
           <Image
             source={{uri: item.get('image').url()}}
             style={styles.thumbnail}
             resizeMode={Image.resizeMode.contain}/>
           <View style={styles.rightContainer}>
-            <Text style={styles.subject}>{item.get('subject')}</Text>
-            <Text style={styles.title}>TEST</Text>
+            <Text style={styles.text}>{item.get('subject')}</Text>
+            <Text style={styles.text}>TEST</Text>
+            <TimeAgo style={styles.text} time={item.get('createdAt')} />
           </View>
         </View>
       </TouchableHighlight>
@@ -85,9 +89,8 @@ var styles = StyleSheet.create({
     paddingLeft: 10,
     paddingTop: 10,
   },
-  subject: {
-
-  }
+  text: {
+  },
 });
 
 module.exports = QuestionListView;

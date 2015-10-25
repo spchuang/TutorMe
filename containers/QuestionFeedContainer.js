@@ -77,8 +77,8 @@ var QuestionFeedContainer = React.createClass({
     }
     return (
       <View style={styles.container}>
-        <Swiper style={styles.wrapper} 
-          showsButtons={false} 
+        <Swiper style={styles.wrapper}
+          showsButtons={false}
           onMomentumScrollEnd={this._onMomentumScrollEnd}
           showsPagination={false}>
           {this._renderQuestions()}
@@ -104,10 +104,10 @@ var QuestionFeedContainer = React.createClass({
 
   _renderQuestion(i: num): $jsx {
     var question = this.state.questions[i];
-    
+
     return (
       <View style={styles.slide}>
-        <QuestionView 
+        <QuestionView
           question={question}
           load={this.state.index === i}
           styles={styles.scroll}

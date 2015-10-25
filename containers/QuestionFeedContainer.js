@@ -21,6 +21,9 @@ var AnswerView = require('../components/AnswerView');
 var Swiper = require('react-native-swiper')
 var TimerMixin = require('react-timer-mixin');
 
+var Parse = require('parse/react-native');
+var ParseReact = require('parse-react/react-native');
+
 var { Icon, } = require('react-native-icons');
 
 var MOCK_DATA = [
@@ -36,30 +39,62 @@ var MOCK_DATA = [
 ];
 
 var QuestionFeedContainer = React.createClass({
+  mixins: [ParseReact.Mixin],
+  getInitialState(): Object {
+    return {
+      isLoading: true,
+      questions: [],
+    };
+  },
+
+  observe: function(props, state) {
+    var questionQuery = (new Parse.Query('questions'));
+    return state.isLoading ?  { questions: questionQuery } : null;
+  },
+
+  componentDidUpdate: function(prevProps, prevState) {
+  if (prevState.isLoading && (this.pendingQueries().length == 0)) {
+      this.setState({ isLoading: false });
+      this.setState({questions: this.data.questions});
+    }
+  },
+
   render(): $jsx {
-    var questions = [];
-    for (var i = 0; i < MOCK_DATA.length; i++) {
-      questions.push(this._renderQuestion(i));
+    if (this.state.isLoading) {
+      return (
+        <Text> Loading..</Text>
+      );
     }
     return (
       <View style={styles.container}>
         <Swiper style={styles.wrapper} 
           showsButtons={false} 
           showsPagination={false}>
-          {questions}
+          {this._renderQuestions()}
         </Swiper>
       </View>
     );
   },
 
+  _renderQuestions(): $jsx {
+    var questions = [];
+    for (var i = 0; i < this.state.questions.length; i++) {
+      questions.push(this._renderQuestion(i));
+    }
+    console.log(this.state.questions);
+    return questions;
+  },
+
   _renderQuestion(i: num): $jsx {
+    var question = this.state.questions[i];
+    
     return (
       <View style={styles.slide}>
         <ScrollView style={styles.scroll}>
           <View style={styles.title}>
-            <Text style={styles.text}>{MOCK_DATA[i].user} - {MOCK_DATA[i].subject}</Text>
+            <Text style={styles.text}>{question.user} - {question.subject}</Text>
           </View>
-          <ImageView source={MOCK_DATA[i].image}/>
+          <ImageView source={question.image.url()}/>
 
           <View style={styles.description}>
             <Text style={styles.text}> 

@@ -18,9 +18,9 @@ var ImageView = React.createClass({
     source: PropTypes.string,
   },
   render(): $jsx {
-    console.log(this.props);
     return (
       <Image style={styles.image} 
+        resizeMode={Image.resizeMode.contain}
         source={{uri: this.props.source}} />
     );
   },
@@ -29,6 +29,7 @@ var ImageView = React.createClass({
 var styles = StyleSheet.create({
   image: {
     height: 300,
+    alignSelf: 'stretch'
   },
 });
 

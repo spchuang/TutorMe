@@ -9,8 +9,8 @@ var React = require('react-native');
 var Parse = require('parse/react-native').Parse;
 
 Parse.initialize(
-  'PvXhEcNgsGqpxmTkxZZAIsXZuOpxoGOz66gC4wTS',
-  'LkffjzgDAejuFQ7atRkAzzvw0HmLqOezFawLV0WB',
+  '',
+  '',
 );
 
 var {
